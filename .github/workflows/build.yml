@@ -21,6 +21,9 @@ jobs:
       - name: Pub Get Packages
         run: flutter pub get
 
+      - name: Console Run_number
+        run: echo ${{ github.run_number }}
+
       - name: Build APK
         run: flutter build apk --split-per-abi --release
 
@@ -33,4 +36,4 @@ jobs:
           artifacts: "build/app/outputs/apk/debug/*.apk"
           token: ${{ secrets.TOKEN }}
           commit: master
-          tag: v${{ github.run_number }}
+          tag: v1.0.${{ github.run_number }}
