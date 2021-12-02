@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
       });
     });
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
-      statusBarColor: Colors.transparent, // optional
+      statusBarColor: Colors.white, // optional
     ));
   }
 
@@ -110,7 +110,6 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 20),
             Container(
               width: MediaQuery.of(context).size.width,
-              height: 220,
               decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [
                     color.AppColor.gradientFirst.withOpacity(0.8),
@@ -128,7 +127,8 @@ class _HomePageState extends State<HomePage> {
                         color: color.AppColor.gradientSecond.withOpacity(0.3))
                   ]),
               child: Container(
-                padding: const EdgeInsets.only(left: 20, top: 25, right: 20),
+                padding: const EdgeInsets.only(
+                    left: 20, top: 25, right: 20, bottom: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -194,7 +194,6 @@ class _HomePageState extends State<HomePage> {
             ),
             SizedBox(height: 5),
             Container(
-              height: 180,
               width: MediaQuery.of(context).size.width,
               child: Stack(
                 children: [
@@ -224,8 +223,7 @@ class _HomePageState extends State<HomePage> {
                     height: 200,
                     width: MediaQuery.of(context).size.width,
                     margin: EdgeInsets.only(
-                        right: MediaQuery.of(context).size.width - 200,
-                        bottom: 30),
+                        right: MediaQuery.of(context).size.width - 200),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         image: DecorationImage(
@@ -233,7 +231,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Container(
                     width: double.maxFinite,
-                    height: 100,
                     margin: const EdgeInsets.only(left: 150, top: 50),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,21 +256,25 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            Row(
-              children: [
-                Text(
-                  "Area of Focus",
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                      color: color.AppColor.homePageTitle),
-                )
-              ],
+            Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Row(
+                children: [
+                  Text(
+                    "Area of Focus",
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        color: color.AppColor.homePageTitle),
+                  )
+                ],
+              ),
             ),
             Expanded(
                 child: OverflowBox(
               maxWidth: MediaQuery.of(context).size.width,
               child: RefreshIndicator(
+                displacement: 20,
                 backgroundColor: color.AppColor.homePageDetail,
                 color: Colors.white,
                 triggerMode: RefreshIndicatorTriggerMode.anywhere,
