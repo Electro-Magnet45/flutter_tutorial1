@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:video_player/video_player.dart';
 import 'colors.dart' as color;
 
 class VideoInfo extends StatefulWidget {
@@ -14,6 +15,9 @@ class VideoInfo extends StatefulWidget {
 class _VideoInfoState extends State<VideoInfo> {
   List videoInfo = [];
   bool _playArea = false;
+  bool _isPlaying = false;
+  int _isPlayingIndex = -1;
+  VideoPlayerController? _controller;
 
   _initData() async {
     await DefaultAssetBundle.of(context)
@@ -32,6 +36,14 @@ class _VideoInfoState extends State<VideoInfo> {
   void initState() {
     super.initState();
     _initData();
+  }
+
+  @override
+  void dispose() {
+    _controller?.pause();
+    _controller?.dispose();
+    _controller = null;
+    super.dispose();
   }
 
   @override
@@ -188,7 +200,8 @@ class _VideoInfoState extends State<VideoInfo> {
                       ],
                     ),
                   ),
-                  _playView(context)
+                  _playView(context),
+                  _controlView(context)
                 ])),
           Expanded(
               child: Container(
@@ -229,13 +242,39 @@ class _VideoInfoState extends State<VideoInfo> {
     ));
   }
 
+  void _onControllerUpdate() async {
+    final controller = _controller;
+    if (controller == null) return;
+    if (!controller.value.isInitialized) return;
+
+    final playing = controller.value.isPlaying;
+    _isPlaying = playing;
+  }
+
+  _initializeVideo(int index) async {
+    final controller =
+        VideoPlayerController.network(videoInfo[index]['videoUrl']);
+    _controller = controller;
+
+    setState(() {});
+    controller
+      ..initialize().then((_) {
+        _isPlayingIndex = index;
+        controller.addListener(_onControllerUpdate);
+        controller.play();
+        setState(() {});
+      });
+  }
+
   _listView() {
     return ListView.builder(
+        physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
         itemCount: videoInfo.length,
         itemBuilder: (_, int index) {
           return GestureDetector(
               onTap: () {
+                _initializeVideo(index);
                 setState(() {
                   if (_playArea == false) _playArea = true;
                 });
@@ -318,7 +357,88 @@ class _VideoInfoState extends State<VideoInfo> {
     );
   }
 
-  _playView(BuildContext context) {
-    return Container();
+  Widget _playView(BuildContext context) {
+    final controller = _controller;
+    if (controller != null && controller.value.isInitialized)
+      return AspectRatio(
+        aspectRatio: 16 / 9,
+        child: VideoPlayer(controller),
+      );
+    return AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Center(
+            child: Text("Preparing...",
+                style: TextStyle(fontSize: 20, color: Colors.white60))));
+  }
+
+  Widget _controlView(BuildContext context) {
+    return Container(
+      height: 120,
+      width: MediaQuery.of(context).size.width,
+      color: color.AppColor.gradientSecond,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TextButton(
+              onPressed: () async {
+                final index = _isPlayingIndex - 1;
+                if (index >= 0 && videoInfo.length >= 0)
+                  return _initializeVideo(index);
+                Get.snackbar("Video List", "",
+                    snackPosition: SnackPosition.BOTTOM,
+                    icon: Icon(Icons.face, size: 30, color: Colors.white),
+                    backgroundColor: color.AppColor.gradientSecond,
+                    colorText: Colors.white,
+                    messageText: Text(
+                      "No videos ahead!",
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ));
+              },
+              child: Icon(
+                Icons.fast_rewind,
+                size: 36,
+                color: Colors.white,
+              )),
+          TextButton(
+              onPressed: () async {
+                if (_isPlaying) {
+                  setState(() {
+                    _isPlaying = false;
+                  });
+                  return _controller?.pause();
+                }
+                setState(() {
+                  _isPlaying = true;
+                });
+                _controller?.play();
+              },
+              child: Icon(
+                _isPlaying ? Icons.pause : Icons.play_arrow,
+                size: 36,
+                color: Colors.white,
+              )),
+          TextButton(
+              onPressed: () async {
+                final index = _isPlayingIndex + 1;
+                if (index <= videoInfo.length - 1)
+                  return _initializeVideo(index);
+                Get.snackbar("Video List", "",
+                    snackPosition: SnackPosition.BOTTOM,
+                    icon: Icon(Icons.face, size: 30, color: Colors.white),
+                    backgroundColor: color.AppColor.gradientSecond,
+                    colorText: Colors.white,
+                    messageText: Text(
+                      "No more videos in the list",
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ));
+              },
+              child: Icon(
+                Icons.fast_forward,
+                size: 36,
+                color: Colors.white,
+              ))
+        ],
+      ),
+    );
   }
 }

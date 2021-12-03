@@ -277,9 +277,9 @@ class _HomePageState extends State<HomePage> {
                 displacement: 20,
                 backgroundColor: color.AppColor.homePageDetail,
                 color: Colors.white,
-                triggerMode: RefreshIndicatorTriggerMode.anywhere,
                 onRefresh: _onrefresh,
                 child: ListView.builder(
+                  physics: const BouncingScrollPhysics(),
                   itemCount: info.length.toDouble() ~/ 2.toInt(),
                   itemBuilder: (_, i) {
                     int a = 2 * i;
